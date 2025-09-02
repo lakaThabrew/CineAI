@@ -4,7 +4,9 @@
 
 CineAI is a modern web application that combines traditional movie search with intelligent AI recommendations. Simply describe what you're in the mood for - like "a dark thriller with a plot twist" or "feel-good comedy for family night" - and let our AI find the perfect movies for you.
 
-![CineAI Banner](https://via.placeholder.com/800x200/1a1a2e/ffffff?text=CineAI+-+AI+Movie+Recommendations)
+<div align="center">
+<img src="cineai_home.png" alt="CineAI Banner" style="width: auto; height:1000px;">
+</div>
 
 ## ✨ Features
 
@@ -30,35 +32,35 @@ CineAI is a modern web application that combines traditional movie search with i
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### 🎨 Frontend
 - **React.js** - Modern UI library
 - **CSS3** - Custom styling with gradients and animations
 - **Responsive Design** - Mobile-first approach
 
-### Backend
+### </> Backend
 - **Node.js** - Server runtime
 - **Express.js** - Web framework
 - **MySQL** - Relational database
 - **JWT** - Secure authentication
 
-### APIs & AI
+### 🔐 APIs & AI
 - **Groq API** - Fast AI language model for recommendations
 - **OMDb API** - Comprehensive movie database
 - **RESTful Architecture** - Clean API design
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 🧩 Prerequisites
 - Node.js (v14 or higher)
 - MySQL Server
 - OMDb API Key
 - Groq API Key
 
-### Installation
+### ⬇️ Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/CineAI.git
+   git clone https://github.com/lakaThabrew/CineAI.git
    cd CineAI
    ```
 
@@ -135,22 +137,22 @@ CineAI is a modern web application that combines traditional movie search with i
 ### Groq API Key
 1. Go to [Groq Console](https://console.groq.com/)
 2. Sign up with your email
-3. Navigate to "API Keys" section
+3. Navigate to the "API Keys" section
 4. Create a new API key
 5. Copy the key (starts with `gsk_`) to your `.env` file
 
 ## 📖 Usage Examples
 
-### AI Recommendations
+### 🦾 AI Recommendations
 ```
-"I want a sci-fi movie like Blade Runner"
-"Suggest a romantic comedy for date night"
+"I want a sci-fi movie like Blade Runner."
+"Suggest a romantic comedy for date night."
 "Dark psychological thriller with great acting"
 "Family-friendly adventure movie"
 "90s action movies with good soundtracks"
 ```
 
-### Search & Filter
+### 🔍 Search & Filter
 - Search by movie title
 - Filter by genre, year, or rating
 - Sort by popularity or release date
@@ -204,7 +206,7 @@ cd client && npm start
 ### Production
 - **Frontend**: Deploy to Vercel, Netlify, or GitHub Pages
 - **Backend**: Deploy to Heroku, Railway, or DigitalOcean
-- **Database**: Use MySQL on cloud platforms or local server
+- **Database**: Use MySQL on cloud platforms or the local server
 
 ## 🤝 Contributing
 
@@ -255,11 +257,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Project Creator**: [Your Name]
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-- Email: your.email@example.com
+**Project Creator**: Lakmana Thabrew
+- GitHub: [@lakaThabrew](https://github.com/lakaThabrew)
+- Email: lakmanathabrew123@gmail.com
 
-**Project Link**: [https://github.com/YOUR_USERNAME/CineAI](https://github.com/YOUR_USERNAME/CineAI)
+**Project Link**: [https://github.com/lakaThabrew/CineAI](https://github.com/lakaThabrew/CineAI)
 
 ---
 
