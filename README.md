@@ -4,6 +4,8 @@
 
 CineAI is a modern web application that combines traditional movie search with intelligent AI recommendations. Simply describe what you're in the mood for - like "a dark thriller with a plot twist" or "feel-good comedy for family night" - and let our AI find the perfect movies for you.
 
+![CineAI Banner](https://via.placeholder.com/800x200/1a1a2e/ffffff?text=CineAI+-+AI+Movie+Recommendations)
+
 ## ✨ Features
 
 ### 🤖 AI-Powered Recommendations
@@ -95,40 +97,13 @@ CineAI is a modern web application that combines traditional movie search with i
 
 5. **Set up MySQL Database**
    
-   Create the database and run the schema:
+   Create the database and tables:
    ```sql
    CREATE DATABASE cineai;
    USE cineai;
    
-   -- Users table
-   CREATE TABLE users (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     username VARCHAR(50) UNIQUE NOT NULL,
-     email VARCHAR(100) UNIQUE NOT NULL,
-     password VARCHAR(255) NOT NULL,
-     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-   );
-   
-   -- Favorites table
-   CREATE TABLE favorites (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     user_id INT NOT NULL,
-     movie_id VARCHAR(20) NOT NULL,
-     movie_title VARCHAR(255) NOT NULL,
-     movie_poster VARCHAR(500),
-     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-     UNIQUE KEY unique_user_movie (user_id, movie_id)
-   );
-   
-   -- Movie cache table
-   CREATE TABLE movie_cache (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     imdb_id VARCHAR(20) UNIQUE NOT NULL,
-     movie_data JSON NOT NULL,
-     cached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 24 HOUR)
-   );
+   -- Run the schema.sql file provided in the server folder
+   SOURCE server/schema.sql;
    ```
 
 6. **Start the Application**
@@ -171,15 +146,15 @@ CineAI is a modern web application that combines traditional movie search with i
 "I want a sci-fi movie like Blade Runner"
 "Suggest a romantic comedy for date night"
 "Dark psychological thriller with great acting"
-"Family-friendly adventure movie from the 90s"
-"Movies similar to The Matrix but more recent"
+"Family-friendly adventure movie"
+"90s action movies with good soundtracks"
 ```
 
 ### Search & Filter
 - Search by movie title
 - Filter by genre, year, or rating
 - Sort by popularity or release date
-- View detailed movie information with cast and plot
+- View detailed movie information
 
 ## 🏗️ Project Structure
 
@@ -191,8 +166,6 @@ CineAI/
 │   │   ├── App.css        # Styling
 │   │   └── index.js       # Entry point
 │   ├── public/
-│   │   ├── index.html
-│   │   └── favicon.ico
 │   └── package.json
 ├── server/                 # Node.js Backend
 │   ├── routes/
@@ -213,29 +186,9 @@ CineAI/
 
 - **Password Hashing**: bcrypt for secure password storage
 - **JWT Authentication**: Secure token-based authentication
-- **Environment Variables**: Sensitive data protected from version control
+- **Environment Variables**: Sensitive data protected
 - **Input Validation**: Prevents SQL injection and XSS attacks
 - **CORS Configuration**: Controlled cross-origin requests
-
-## 🌐 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-
-### Movies
-- `GET /api/movies/search?q={query}` - Search movies by title
-- `GET /api/movies/{id}` - Get detailed movie information
-- `GET /api/movies/trending` - Get trending movies
-
-### Recommendations
-- `POST /api/recommendations` - Get AI-powered recommendations
-- Body: `{ "prompt": "your natural language request" }`
-
-### Favorites
-- `GET /api/favorites` - Get user's favorite movies
-- `POST /api/favorites` - Add movie to favorites
-- `DELETE /api/favorites/{movieId}` - Remove from favorites
 
 ## 🚀 Deployment
 
@@ -248,10 +201,10 @@ cd server && npm run dev
 cd client && npm start
 ```
 
-### Production Ready
+### Production
 - **Frontend**: Deploy to Vercel, Netlify, or GitHub Pages
 - **Backend**: Deploy to Heroku, Railway, or DigitalOcean
-- **Database**: Use PlanetScale, AWS RDS, or DigitalOcean MySQL
+- **Database**: Use MySQL on cloud platforms or local server
 
 ## 🤝 Contributing
 
@@ -279,34 +232,15 @@ cd client && npm start
   - Actor/director-based suggestions
 
 - [ ] **Technical Improvements**
-  - Redis caching for better performance
+  - Caching layer for better performance
   - Real-time notifications
   - Progressive Web App (PWA) support
 
 ## 🐛 Known Issues
 
-- Movie poster images may occasionally fail to load due to external API limitations
+- Movie poster images may occasionally fail to load
 - AI recommendations work best with specific, descriptive prompts
-- Free API tiers have rate limits (OMDb: 1000/day, Groq: varies by plan)
-
-## 📊 Performance
-
-- **Fast AI Responses**: Groq provides sub-second recommendation generation
-- **Efficient Caching**: Movie data cached for 24 hours to reduce API calls
-- **Optimized Queries**: Database queries optimized for quick search results
-- **Responsive Design**: Smooth performance across all device sizes
-
-## 🧪 Testing
-
-```bash
-# Run frontend tests
-cd client
-npm test
-
-# Backend API testing
-cd server
-npm test
-```
+- Free API tiers have rate limits (OMDb: 1000/day, Groq: varies)
 
 ## 📄 License
 
@@ -318,9 +252,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Groq](https://groq.com/) for lightning-fast AI inference
 - [React](https://reactjs.org/) for the amazing frontend framework
 - [Express.js](https://expressjs.com/) for the robust backend framework
-- [MySQL](https://www.mysql.com/) for reliable data storage
 
 ## 📞 Contact
+
+**Project Creator**: [Your Name]
+- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
+- Email: your.email@example.com
 
 **Project Link**: [https://github.com/YOUR_USERNAME/CineAI](https://github.com/YOUR_USERNAME/CineAI)
 
@@ -332,14 +269,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for movie lovers everywhere**
 
-*CineAI - Where AI meets Cinema* 🎭
-
 </div>
-
-## 🎯 Quick Demo
-
-1. **Register/Login** → Create your account
-2. **Try AI Recommendations** → "I want a mind-bending sci-fi movie"
-3. **Search Movies** → Type any movie title
-4. **Add Favorites** → Save movies for later
-5. **Enjoy!** → Discover amazing movies with AI power
