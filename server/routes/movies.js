@@ -49,7 +49,7 @@ router.get('/search', async (req, res) => {
     const movies = omdbResponse.data.Search;
     const detailedMovies = [];
 
-    for (const movie of movies.slice(0, 5)) { // Get details for first 5 movies
+    for (const movie of movies.slice(0, 8)) { // Get details for first 5 movies
       try {
         const details = await getMovieDetails(movie.imdbID);
         if (details) {
