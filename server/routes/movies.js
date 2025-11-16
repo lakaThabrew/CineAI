@@ -116,19 +116,25 @@ router.get('/details/:imdbId', async (req, res) => {
 // Get trending/popular movies
 router.get('/trending', async (req, res) => {
   try {
-    // Try to get from cache first
-    const [trendingMovies] = await pool.execute(
-      'SELECT * FROM movies_cache WHERE imdb_rating >= 7.0 ORDER BY imdb_rating DESC, created_at DESC LIMIT 20'
-    );
+    // Allow clients to force fetching from OMDb (bypass cache) by passing ?force=1 or ?source=omdb
+    const { force, source } = req.query;
+    const forceOmdb = force === '1' || force === 'true' || source === 'omdb';
 
-    if (trendingMovies.length >= 10) {
-      return res.json({
-        source: 'cache',
-        movies: trendingMovies
-      });
+    if (!forceOmdb) {
+      // Try to get from cache first
+      const [trendingMovies] = await pool.execute(
+        'SELECT * FROM movies_cache WHERE imdb_rating >= 7.0 ORDER BY imdb_rating DESC, created_at DESC LIMIT 20'
+      );
+
+      if (trendingMovies.length >= 10) {
+        return res.json({
+          source: 'cache',
+          movies: trendingMovies
+        });
+      }
     }
 
-    // Fallback: fetch some popular movies
+    // Fetch fresh popular movies from OMDb (either fallback or forced)
     const popularTitles = [
       'The Dark Knight', 'Inception', 'Pulp Fiction', 'The Shawshank Redemption',
       'Forrest Gump', 'The Matrix', 'Goodfellas', 'The Godfather',
@@ -149,7 +155,8 @@ router.get('/trending', async (req, res) => {
         if (searchResponse.data.Response === 'True') {
           const movie = formatMovieData(searchResponse.data);
           movies.push(movie);
-          await cacheMovie(movie);
+          // Cache the fresh movie data asynchronously (don't block response)
+          cacheMovie(movie).catch(err => console.error('Cache movie error:', err));
         }
       } catch (error) {
         console.error(`Error fetching ${title}:`, error);

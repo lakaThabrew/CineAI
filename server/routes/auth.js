@@ -142,4 +142,39 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// Update current user (protected route)
+router.put('/me', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+      return res.status(400).json({ error: 'Username and email are required' });
+    }
+
+    // Update user in database
+    await pool.execute(
+      'UPDATE users SET username = ?, email = ? WHERE id = ?',
+      [username, email, decoded.userId]
+    );
+
+    const [users] = await pool.execute(
+      'SELECT id, username, email, created_at FROM users WHERE id = ?',
+      [decoded.userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user: users[0] });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Error updating user' });
+  }
+});
+
 module.exports = router;
