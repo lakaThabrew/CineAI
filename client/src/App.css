@@ -200,13 +200,19 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+  background: #3a86ff;
   color: white;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  border: none;
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
+  background: #0059ff;
   box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
 }
 
@@ -400,13 +406,25 @@ body {
   display: block;
 }
 
-/* About / Profile pages - layout like the screenshot: large header on gradient background */
-.about-page,
-.profile-page {
+/* About / pages - layout like the screenshot: large header on gradient background */
+.about-page
+{
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 2rem 6rem 2rem; /* leave space below */
   color: rgba(255,255,255,0.95);
+}
+
+.profile-page {
+  width: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  color: #e5e7eb;
+  background: #0c0f14;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
 .about-content {
@@ -432,8 +450,18 @@ body {
 .stats-list, 
 .recent-views,
 .watchlist {
-  margin-left: 50px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.6rem;
+  margin: 0.4rem 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+.stats-list strong,
+.profile-info strong {
+  color: #3a86ff;
+}
+
 /* Creative About / Profile styles */
 .about-hero {
   display: flex;
@@ -478,21 +506,33 @@ body {
 }
 
 .profile-avatar {
-  width: 88px;
-  height: 88px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d7459d, #e92424);
+  background: linear-gradient(145deg, #1b263b, #0d1b2a);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.2rem;
   font-weight: 700;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  box-shadow: 0 10 15px #3a86ff88;
   margin: 10px;
+  border : 3px solid #3a86ff;
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px #3a86ff88;
+  }
+  50% {
+    box-shadow: 0 0 30px #3a86ffcc;
+  }
 }
 
 .profile-hero-right h1 {
+  font-size: 2.3rem;
   margin: 0;
   color: #fff;
 }
@@ -500,6 +540,23 @@ body {
 .profile-hero-right .bio {
   margin-top: 0.4rem;
   color: rgba(255,255,255,0.9);
+}
+
+.profile-hero-right .muted {
+  color: #9ca3af;
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.membership-badge {
+  margin-top: 0.5rem;
+  display: inline-block;
+  background: #3a86ff22;
+  color: #3a86ff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid #3a86ff66;
 }
 
 .muted {
@@ -528,8 +585,20 @@ body {
   background: linear-gradient(180deg, rgba(5, 237, 214, 0.96), rgba(50, 144, 226, 0.9));
   color: #1e3c72;
   padding: 1.6rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.profile-card h2 {
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.profile-info p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
 }
 
 .profile-edit-form label {
@@ -545,25 +614,25 @@ body {
   margin-top: 0.25rem;
 }
 
-.profile-avatar {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff8e8e, #ff6b6b);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 700;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
-}
-
 .profile-actions {
   margin-top: 1rem;
 }
 
-.edit-profile-btn { margin-top: 0.6rem; }
+.edit-profile-btn {
+  margin-top: 1rem;
+  background: none;
+  color: #3a86ff;
+  border: 1px solid #3a86ff88;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.edit-profile-btn:hover {
+  background: #3a86ff22;
+  border-color: #3a86ff;
+}
 
 .success-message { color: green; margin: 0.5rem 0; }
 .error-message { color: red; margin: 0.5rem 0; }
@@ -825,6 +894,25 @@ body {
     padding-top: 1rem;
     margin-left: 0;
     padding-left: 0;
+  }
+
+  .profile-hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 75px;
+    height: 75px;
+    font-size: 35px;
+  }
+
+  .profile-hero-right h1 {
+    font-size: 1.8rem;
+  }
+
+  .profile-page {
+    padding: 1rem;
   }
 }
 
