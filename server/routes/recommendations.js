@@ -31,10 +31,52 @@ router.post('/ai', async (req, res) => {
 
     if (cachedRecommendations.length > 0) {
       console.log('Returning cached recommendations for prompt hash:', promptHash);
+
+      // The stored `recommendations` column may be a JSON string, a Buffer,
+      // or (in some edge cases) a string like "[object Object]". Be defensive
+      // when parsing so we don't throw while trying to return cached results.
+      const raw = cachedRecommendations[0].recommendations;
+      let parsed = null;
+
+      try {
+        if (typeof raw === 'string') {
+          parsed = JSON.parse(raw);
+        } else if (raw && typeof raw === 'object' && raw.toString && raw.toString() === '[object Object]') {
+          // Some MySQL drivers may coerce objects into a string like '[object Object]'.
+          // In that case, fall back to the stored user_prompt or return an empty list.
+          parsed = null;
+        } else if (Buffer && Buffer.isBuffer(raw)) {
+          parsed = JSON.parse(raw.toString());
+        } else {
+          // Already an object
+          parsed = raw;
+        }
+      } catch (parseErr) {
+        console.warn('Cached recommendations parse warning:', parseErr && parseErr.message);
+        parsed = null;
+      }
+
+      // `parsed` may be the full response object (with a `recommendations` field),
+      // or it may directly be an array of recommendations. Normalize to an array.
+      let recommendations = [];
+      if (parsed) {
+        if (Array.isArray(parsed)) recommendations = parsed;
+        else if (Array.isArray(parsed.recommendations)) recommendations = parsed.recommendations;
+        else if (Array.isArray(parsed.data)) recommendations = parsed.data;
+      }
+
+      // As a final fallback, attempt to use the raw value if it already looks like JSON-ish
+      if (recommendations.length === 0) {
+        // If raw is an object with a nested recommendations property, use that
+        if (raw && typeof raw === 'object' && Array.isArray(raw.recommendations)) {
+          recommendations = raw.recommendations;
+        }
+      }
+
       return res.json({
         source: 'cache',
-        recommendations: JSON.parse(cachedRecommendations[0].recommendations),
-        originalPrompt: cachedRecommendations[0].user_prompt
+        recommendations: recommendations,
+        originalPrompt: cachedRecommendations[0].user_prompt || (parsed && parsed.originalPrompt) || ''
       });
     }
 
@@ -609,22 +651,20 @@ function formatMovieData(omdbData) {
 // Cache movie data
 async function cacheMovie(movieData) {
   try {
+    // Insert only the columns that exist in the current movies_cache schema.
     await pool.execute(
       `INSERT INTO movies_cache 
-       (imdb_id, title, year, genre, director, actors, plot, poster_url, imdb_rating, runtime, language, country, rated, released, awards)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (imdb_id, title, year, genre, director, actors, plot, poster_url, imdb_rating, runtime, language, country)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
        title = VALUES(title), year = VALUES(year), genre = VALUES(genre),
        director = VALUES(director), actors = VALUES(actors), plot = VALUES(plot),
        poster_url = VALUES(poster_url), imdb_rating = VALUES(imdb_rating),
-       runtime = VALUES(runtime), language = VALUES(language), country = VALUES(country),
-       rated = VALUES(rated), released = VALUES(released), awards = VALUES(awards),
-       last_updated = NOW()`,
+       runtime = VALUES(runtime), language = VALUES(language), country = VALUES(country)`,
       [
         movieData.imdb_id, movieData.title, movieData.year, movieData.genre,
         movieData.director, movieData.actors, movieData.plot, movieData.poster_url,
-        movieData.imdb_rating, movieData.runtime, movieData.language, movieData.country,
-        movieData.rated, movieData.released, movieData.awards
+        movieData.imdb_rating, movieData.runtime, movieData.language, movieData.country
       ]
     );
     console.log(`Cached movie: ${movieData.title}`);

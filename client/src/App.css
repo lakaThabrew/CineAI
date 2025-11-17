@@ -79,6 +79,7 @@ body {
 .nav-logo {
   cursor: pointer;
   transition: transform 0.2s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .nav-logo:hover {

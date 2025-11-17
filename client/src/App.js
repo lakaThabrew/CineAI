@@ -145,7 +145,7 @@ function Navbar({ user, currentPage, setCurrentPage, logout }) {
       <div className="nav-container">
         <div className="nav-logo" onClick={() => setCurrentPage('home')}>
           <img src="/logo192.png" alt="CineAI" className="nav-logo-img" />
-          <h1>🎬 CineAI</h1>
+          <h1>CineAI</h1>
         </div>
 
         <div className="nav-links">
@@ -237,7 +237,10 @@ function Home({ setCurrentPage, onOpen }) {
       // request fresh trending from OMDb (bypass DB cache)
       const resp = await fetch('http://localhost:5000/api/movies/trending?force=1');
       const data = await resp.json();
-      setTrendingMovies(data.movies || []);
+      // sort by imdb_rating descending when available
+      const movies = (data.movies || []).slice();
+      movies.sort((a, b) => (b.imdb_rating || 0) - (a.imdb_rating || 0));
+      setTrendingMovies(movies);
       setLastUpdated(Date.now());
     } catch (err) {
       console.error('Error fetching trending movies:', err);
@@ -257,7 +260,7 @@ function Home({ setCurrentPage, onOpen }) {
     <div className="home">
       <section className="hero">
         <div className="hero-content">
-          <h1>🎬 Welcome to CineAI</h1>
+          <h1>🎥 Welcome to CineAI</h1>
           <p>Discover your next favorite movie with AI-powered recommendations</p>
           <div className="hero-buttons">
             <button
@@ -331,7 +334,10 @@ function Search({ onOpen }) {
     try {
       const response = await fetch(`http://localhost:5000/api/movies/search?title=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      setMovies(data.movies || []);
+      // sort search results by imdb_rating desc when available
+      const results = (data.movies || []).slice();
+      results.sort((a, b) => (b.imdb_rating || 0) - (a.imdb_rating || 0));
+      setMovies(results);
       setSearched(true);
     } catch (error) {
       console.error('Search error:', error);
@@ -371,7 +377,10 @@ function Search({ onOpen }) {
                       const resp = await fetch(`http://localhost:5000/api/movies/search?title=${encodeURIComponent(value)}`);
                       if (resp.ok) {
                         const data = await resp.json();
-                        setSuggestions((data.movies || []).slice(0, 6));
+                            // sort suggestions by imdb_rating desc when available
+                            const suggs = (data.movies || []).slice();
+                            suggs.sort((a, b) => (b.imdb_rating || 0) - (a.imdb_rating || 0));
+                            setSuggestions(suggs.slice(0, 6));
                         setShowSuggestions(true);
                       } else {
                         setSuggestions([]);
@@ -1046,7 +1055,10 @@ function Recommendations({ user, onOpen }) {
       });
 
       const data = await response.json();
-      setRecommendations(data.recommendations || []);
+      // sort AI recommendations by imdb_rating desc when present
+      const recs = (data.recommendations || []).slice();
+      recs.sort((a, b) => (b.imdb_rating || 0) - (a.imdb_rating || 0));
+      setRecommendations(recs);
       setExplanation(data.explanation || '');
     } catch (error) {
       console.error('Error getting AI recommendations:', error);

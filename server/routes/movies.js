@@ -3,6 +3,22 @@ const express = require('express');
 const axios = require('axios');
 const { pool } = require('../config/database');
 
+// Helper to call OMDb with retries, HTTPS and a timeout
+async function fetchOmdb(params, retries = 3, timeout = 5000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await axios.get('https://www.omdbapi.com/', { params, timeout });
+      return response.data;
+    } catch (err) {
+      const last = attempt === retries;
+      console.warn(`OMDb request failed (attempt ${attempt}/${retries})`, err && err.message);
+      if (last) throw err;
+      // backoff before retrying
+      await new Promise((r) => setTimeout(r, 500 * attempt));
+    }
+  }
+}
+
 const router = express.Router();
 
 // Search movies by title
@@ -28,25 +44,27 @@ router.get('/search', async (req, res) => {
       });
     }
 
-    // If not in cache, fetch from OMDb API
-    const omdbResponse = await axios.get(`http://www.omdbapi.com/`, {
-      params: {
+    // If not in cache, fetch from OMDb API (with retries/timeout)
+    let omdbData;
+    try {
+      omdbData = await fetchOmdb({
         apikey: process.env.OMDB_API_KEY,
         s: title,
         y: year,
         page: page,
         type: 'movie'
-      }
-    });
-
-    if (omdbResponse.data.Response === 'False') {
-      return res.status(404).json({ 
-        error: omdbResponse.data.Error || 'No movies found' 
       });
+    } catch (err) {
+      console.error('OMDb search failed:', err && err.message);
+      return res.status(502).json({ error: 'OMDb API request failed' });
+    }
+
+    if (!omdbData || omdbData.Response === 'False') {
+      return res.status(404).json({ error: (omdbData && omdbData.Error) || 'No movies found' });
     }
 
     // Cache the search results
-    const movies = omdbResponse.data.Search;
+    const movies = omdbData.Search;
     const detailedMovies = [];
 
     for (const movie of movies.slice(0, 8)) { // Get details for first 5 movies
@@ -65,7 +83,7 @@ router.get('/search', async (req, res) => {
     res.json({
       source: 'omdb',
       movies: detailedMovies,
-      totalResults: omdbResponse.data.totalResults
+      totalResults: parseInt(omdbData.totalResults) || detailedMovies.length
     });
 
   } catch (error) {
@@ -144,29 +162,38 @@ router.get('/trending', async (req, res) => {
     const movies = [];
     for (const title of popularTitles) {
       try {
-        const searchResponse = await axios.get(`http://www.omdbapi.com/`, {
-          params: {
-            apikey: process.env.OMDB_API_KEY,
-            t: title,
-            type: 'movie'
-          }
+        const searchData = await fetchOmdb({
+          apikey: process.env.OMDB_API_KEY,
+          t: title,
+          type: 'movie'
         });
 
-        if (searchResponse.data.Response === 'True') {
-          const movie = formatMovieData(searchResponse.data);
+        if (searchData && searchData.Response === 'True') {
+          const movie = formatMovieData(searchData);
           movies.push(movie);
           // Cache the fresh movie data asynchronously (don't block response)
-          cacheMovie(movie).catch(err => console.error('Cache movie error:', err));
+          cacheMovie(movie).catch((err) => console.error('Cache movie error:', err));
         }
       } catch (error) {
-        console.error(`Error fetching ${title}:`, error);
+        console.error(`Error fetching ${title}:`, error && error.message);
       }
     }
 
-    res.json({
-      source: 'omdb',
-      movies: movies
-    });
+    // If OMDb failed to return any movies, try returning cache as a fallback
+    if (movies.length === 0) {
+      try {
+        const [cachedFallback] = await pool.execute(
+          'SELECT * FROM movies_cache WHERE imdb_rating >= 6.0 ORDER BY imdb_rating DESC, created_at DESC LIMIT 20'
+        );
+        if (cachedFallback && cachedFallback.length > 0) {
+          return res.json({ source: 'cache-fallback', movies: cachedFallback });
+        }
+      } catch (err) {
+        console.error('Error reading cache fallback:', err && err.message);
+      }
+    }
+
+    res.json({ source: 'omdb', movies });
 
   } catch (error) {
     console.error('Trending movies error:', error);
@@ -177,16 +204,14 @@ router.get('/trending', async (req, res) => {
 // Helper function to get movie details from OMDb
 async function getMovieDetails(imdbId) {
   try {
-    const response = await axios.get(`http://www.omdbapi.com/`, {
-      params: {
-        apikey: process.env.OMDB_API_KEY,
-        i: imdbId,
-        plot: 'full'
-      }
+    const data = await fetchOmdb({
+      apikey: process.env.OMDB_API_KEY,
+      i: imdbId,
+      plot: 'full'
     });
 
-    if (response.data.Response === 'True') {
-      return formatMovieData(response.data);
+    if (data && data.Response === 'True') {
+      return formatMovieData(data);
     }
     return null;
   } catch (error) {
